@@ -1,0 +1,33 @@
+{
+  "name": "wikiref",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack watch --config ./webpack.config.js --mode development",
+    "serve": "serve ./build",
+    "build": "webpack --config ./webpack.config.js --mode production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "babel-loader": "^8.2.3",
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.6.0"
+  },
+  "babel": {
+    "presets": [
+        "@babel/preset-env"
+    ]
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "core-js": "^3.21.0",
+    "regenerator-runtime": "^0.13.9",
+    "serve": "^13.0.2"
+  }
+}
