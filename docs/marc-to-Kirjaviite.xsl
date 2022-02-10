@@ -32,11 +32,17 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+
+
+
+  <xsl:template name="author">
+    <xsl:apply-templates select="marc:datafield[@tag=100] | marc:datafield[@tag=700]"/>
+  </xsl:template>
   
 
   <xsl:template match="marc:record">
     <xsl:text>{{Kirjaviite&#10;</xsl:text>
-    <xsl:text> | Tekijä = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=700]"/><xsl:text>&#10;</xsl:text>
+    <xsl:text> | Tekijä = </xsl:text><xsl:call-template name="author"/><xsl:text>&#10;</xsl:text>
     <xsl:text> | Nimeke = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=245]"/><xsl:text>&#10;</xsl:text>
     <xsl:text> | Vuosi = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='c']"/><xsl:text>&#10;</xsl:text>
     <xsl:text> | Kappale = </xsl:text><xsl:text>&#10;</xsl:text>
@@ -105,6 +111,28 @@
       </xsl:for-each>
 
   </xsl:template>
+
+  <xsl:template match="marc:datafield[@tag=100]">
+      <xsl:for-each select="marc:subfield[@code='a']">
+	<!-- Main entry - Personal name -->
+        <xsl:call-template name="remove-suffix">
+          <xsl:with-param name="text" select="text()"/>
+        </xsl:call-template>
+      </xsl:for-each>
+      <xsl:for-each select="marc:subfield[@code='e']">
+	<!-- Relator term -->
+	<xsl:text> (</xsl:text>
+        <xsl:call-template name="remove-suffix">
+          <xsl:with-param name="text" select="text()"/>
+        </xsl:call-template>
+        <xsl:text>)</xsl:text>
+      </xsl:for-each>
+
+      <xsl:if test="position() != last()">
+        <xsl:text> &amp; </xsl:text>
+      </xsl:if>
+  </xsl:template>
+  
 
   <xsl:template match="marc:datafield[@tag=260]/marc:subfield[@code='a']">
     <!-- Place of publication, distribution, etc. -->
