@@ -1,0 +1,72 @@
+html, body {
+    height: 100vh;
+    padding: 0 1em;
+}
+
+body {
+    background-color: lightgray;
+}
+
+#main {
+    margin: 0 auto;
+    padding: 0 1em;
+    background-color: white;
+    width: 768px;
+    height: 100vh;
+    overflow: clip;
+    
+}
+
+
+h1, h2 {
+    font-size: 90%;
+    font-family: sans-serif;
+    margin-bottom: 0;
+}
+
+#message-bar-render, #message-bar-edit {
+    display: none;
+    border: solid salmon 1px;
+    border-radius: 5px;
+    background-color: lightsalmon;
+    padding: 0.5em;
+    margin: 0.5em 0;    
+}
+
+
+form {
+    padding: 0.5em;
+    line-height: 2em;
+}
+
+form label {
+    width: 7em;
+    display: inline-block;
+}
+
+label::focus {
+    outline: dashed black 1px;
+}
+
+.scrollable-panel {
+    overflow: scroll;
+    height: 50vh;
+
+}
+
+.scrollable-panel > * {
+    height: 100%;
+}
+
+.result-divider {
+    border-width: 1px 0;
+    border-color: #555;
+    background-color: #777;
+    color: white;
+    margin: 0.5em auto;
+    text-align: center;
+}
+
+input:focus {
+    outline: dashed gray 1px;
+}
