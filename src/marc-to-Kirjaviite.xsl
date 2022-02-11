@@ -8,9 +8,9 @@
 
   <xsl:template name="remove-suffix">
     <xsl:param name="text" select="''" />
-    <xsl:variable name="len" select="string-length($text)" />    
+    <xsl:variable name="len" select="string-length($text)" />
 
-    
+
     <xsl:choose>
       <xsl:when test="substring($text, $len) = ','">
         <xsl:value-of select="substring($text, 1, $len - 1)" />
@@ -38,24 +38,70 @@
   <xsl:template name="author">
     <xsl:apply-templates select="marc:datafield[@tag=100] | marc:datafield[@tag=700]"/>
   </xsl:template>
-  
+
+
+  <xsl:template name="description">
+    <!-- Original version note -->
+    <!-- Introductory phrase -->
+    <xsl:value-of select="marc:datafield[@tag=534]/marc:subfield[@code='p']"/>
+    <xsl:text> </xsl:text>
+    <!-- Publication, distribution, etc. of original -->
+    <xsl:value-of select="marc:datafield[@tag=534]/marc:subfield[@code='c']"/>
+  </xsl:template>
+
 
   <xsl:template match="marc:record">
+
     <xsl:text>{{Kirjaviite&#10;</xsl:text>
-    <xsl:text> | Tekijä = </xsl:text><xsl:call-template name="author"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | Nimeke = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=245]"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | Vuosi = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='c']"/><xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | Tekijä = </xsl:text>
+    <xsl:call-template name="author"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | Nimeke = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=245]"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | Vuosi = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='c']"/>
+    <xsl:text>&#10;</xsl:text>
+
     <xsl:text> | Kappale = </xsl:text><xsl:text>&#10;</xsl:text>
     <xsl:text> | Sivu = </xsl:text><xsl:text>&#10;</xsl:text>
-    <xsl:text> | Selite = </xsl:text><xsl:text>&#10;</xsl:text>
-    <xsl:text> | Julkaisupaikka = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='a']"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | Julkaisija = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='b']"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | Tunniste = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=020]/marc:subfield[@code='a']"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | www = &#10;</xsl:text>
-    <xsl:text> | www-teksti = &#10;</xsl:text>
-    <xsl:text> | Tiedostomuoto = &#10;</xsl:text>
+    <xsl:text> | Selite = </xsl:text>
+    <xsl:call-template name="description"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | Julkaisupaikka = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='a']"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | Julkaisija = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='b']"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | Tunniste = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=020]/marc:subfield[@code='a']"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | www = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=856]/marc:subfield[@code='u']"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | www-teksti = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=856]/marc:subfield[@code='y']"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | Tiedostomuoto = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=856]/marc:subfield[@code='q']"/>
+    <xsl:text>&#10;</xsl:text>
+
     <xsl:text> | Viitattu = &#10;</xsl:text>
-    <xsl:text> | Kieli = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=041]/marc:subfield[@code='a']"/><xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | Kieli = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=041]/marc:subfield[@code='a']"/>
+    <xsl:text>&#10;</xsl:text>
+
     <xsl:text>}}&#10;</xsl:text>
   </xsl:template>
 
@@ -93,6 +139,7 @@
       <xsl:text> &amp; </xsl:text>
     </xsl:if>
   </xsl:template>
+
 
   <xsl:template match="marc:datafield[@tag=245]">
     <!-- Title -->
@@ -132,7 +179,7 @@
         <xsl:text> &amp; </xsl:text>
       </xsl:if>
   </xsl:template>
-  
+
 
   <xsl:template match="marc:datafield[@tag=260]/marc:subfield[@code='a']">
     <!-- Place of publication, distribution, etc. -->
@@ -174,6 +221,32 @@
         <xsl:text> &amp; </xsl:text>
       </xsl:if>
   </xsl:template>
+
+
+  <xsl:template match="marc:datafield[@tag=856]/marc:subfield[@code='u']">
+    <!-- Electronic location and access: Uniform Resource Identifier -->
+    <xsl:value-of select="text()"/>
+    <xsl:if test="position() != last()">
+      <xsl:text> &amp; </xsl:text>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="marc:datafield[@tag=856]/marc:subfield[@code='q']">
+    <!-- Electronic location and access: Electronic format type -->
+    <xsl:value-of select="text()"/>
+    <xsl:if test="position() != last()">
+      <xsl:text> &amp; </xsl:text>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="marc:datafield[@tag=856]/marc:subfield[@code='y']">
+    <!-- Electronic location and access: Link text -->
+    <xsl:value-of select="text()"/>
+    <xsl:if test="position() != last()">
+      <xsl:text> &amp; </xsl:text>
+    </xsl:if>
+  </xsl:template>
+
 
   <xsl:template match="marc:datafield[@tag=*]">
   </xsl:template>
