@@ -52,7 +52,7 @@
 
       <div class="panel">
       <div id="query-info" class="panel-body">
-
+        <span id="loading"><i class="loading-v2"></i> Loading</span><span id="message"></span>
       </div>
       </div>
 
@@ -68,7 +68,7 @@
           <div class="tab-btns">
 	    <label for="tab-1" class="btn" tabindex="0">Kirjaviite</label>
 	    <label for="tab-2" class="btn" tabindex="0">Cite book</label>
-	    <label for="tab-3" class="btn" tabindex="0">Tab 3</label>
+	    <label for="tab-3" class="btn" tabindex="0">XML</label>
 	    <label for="tab-4" class="btn" tabindex="0">Tab 4</label>
 	    <label for="tab-5" class="btn" tabindex="0">Tab 5</label>
 	    <label for="tab-6" class="btn" tabindex="0">Info</label>
@@ -88,10 +88,10 @@
             </div>
           </div>
           <div class="tab-info">
-	    <h3>Information for tab 3</h3>
-	    Another line of information.
-	    <br>
-	    Another line of information.
+            <div class="panel scrollable-panel">
+              <textarea id="results-xml" class="results" disabled>
+              </textarea>
+            </div>
           </div>
           <div class="tab-info">
 	    <h3>Information for tab 4</h3>
