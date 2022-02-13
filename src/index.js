@@ -9,13 +9,14 @@ const data = {
     xsl: {
         marcToEnglish: undefined,
         marcToKirjaviite: undefined,
-        marcToCiteBook: undefined,        
+        marcToCiteBook: undefined,
+        marcToMarc: 1
     }
 };
 
 const state = {
     queryCache: {},
-    selectedXSL: undefined,
+    selectedRecord: undefined,
 };
 
 window.queryCache = state.queryCache;
@@ -41,6 +42,10 @@ const fetchXML = async (filename) => {
 
 
 const transformDocument = (xml, xsl) => {
+    if ( xsl === data.xsl.marcToMarc ) {
+        const txt = document.createTextNode(xml.outerHTML);
+        return txt;
+    }
     const xsltProcessor = new XSLTProcessor();
     xsltProcessor.importStylesheet(xsl);
     const resultDocument = xsltProcessor.transformToFragment(xml, document);
@@ -67,10 +72,10 @@ const makeQuery = async (cglQuery) => {
 
     const queryResult = state.queryCache[cglQuery]
                      || await sru.queryEndpoint(config.ENDPOINT, params);
-    
+
     state.queryCache[cglQuery] = queryResult;
     state.currentQuery = cglQuery;
-    
+
     return queryResult;
 };
 
@@ -81,14 +86,63 @@ const clearResults = () => {
     }
 };
 
+const unselectRecords = () => {
+    const oldSels = document.getElementsByClassName('selected-record');
+    for ( let oldSel of oldSels ) {
+        oldSel.classList.remove('selected-record');
+    }
+    state.selectedRecord = undefined;
+}
+
+const selectRecordClass = (classId) => {
+    const newSels = document.getElementsByClassName(classId);
+    if ( newSels.length === 0 ) {
+        return;
+    }
+    
+    unselectRecords();
+
+    for ( let newSel of newSels ) {
+        newSel.classList.add('selected-record');
+    }
+    state.selectedRecord = classId;
+}
+
+const getChildOfClass = (resultsDiv, classId) => {
+    for ( let i in resultsDiv.children ) {
+        const child = resultsDiv.children[i];
+        if ( child.classList.contains(classId) ) {
+            return child;
+        }
+    }
+
+    return null;
+};
+
+const scrollTo = (resultsDiv, classId) => {
+    const recordElem = getChildOfClass(resultsDiv, classId);
+    if ( !recordElem ) {
+        return;
+    }
+    
+    const topPos = recordElem.offsetTop;
+    resultsDiv.scrollTop = topPos;
+}
+
+
 const showNumberOfRecords = (text) => {
-    const infoDiv = document.getElementById('query-info');
+    const messageSpan = document.getElementById('message');
     const num = parseInt(text, 10);
-    const cap = Math.min(num, 10);
-    if ( num > 0 ) {
-        infoDiv.textContent = `Found ${num} records. Showing 1–${cap}.`;
+    const MAX = 10;
+    const cap = Math.min(num, MAX);
+    if ( num === 0 ) {
+        messageSpan.textContent = `Löytyi 0 tietuetta.`;
+    } else if ( num === 1 ) {
+        messageSpan.textContent = `Löytyi 1 tietue.`;
+    } else if ( num <= MAX ) {
+        messageSpan.textContent = `Löytyi ${num} tietuetta.`;
     } else {
-        infoDiv.textContent = `Found ${num}.`;        
+        messageSpan.textContent = `Löytyi ${num} tietuetta. Näytetään 1–${cap}.`;
     }
 };
 
@@ -110,20 +164,40 @@ const showResultInOutput = (queryResultDoc, xsl, resultsDiv) => {
         showNumberOfRecords(numRecordsElems[0].textContent);
     }
 
-    
+    if ( xsl === data.xsl.marcToMarc ) {
+        resultsDiv.appendChild(document.createTextNode('<container>\n'));
+    }
+
     const records = queryResultDoc.getElementsByTagNameNS("http://www.loc.gov/MARC21/slim", "record");
     let count = 1;
     for ( let record of records ) {
-        if ( record !== records[0] ) {
+        if ( record !== records[0] && xsl !== data.xsl.marcToMarc ) {
             const divider = document.createElement('div');
-            divider.setAttribute('class', 'result-divider');
+            divider.classList.add('result-divider');
             divider.appendChild(document.createTextNode(`Result ${count}`));
             resultsDiv.appendChild(divider);
         }
+
         const resultDocument = transformDocument(record, xsl);
-        resultsDiv.appendChild(resultDocument);
+        const container = document.createElement('div');
+        container.appendChild(resultDocument);
+        container.classList.add(`record-${count}`);
+        resultsDiv.appendChild(container);
+        container.onclick = (event) => {
+            selectRecordClass(event.target.getAttribute('class'));
+        };
         count++;
     }
+
+    if ( xsl === data.xsl.marcToMarc ) {
+        resultsDiv.appendChild(document.createTextNode('</container>\n'));
+    }
+
+    if ( state.selectedRecord ) {
+        selectRecordClass(state.selectedRecord);
+        scrollTo(resultsDiv, state.selectedRecord);
+    }
+
 }
 
 const getCheckedCheckboxId = (groupName) => {
@@ -143,6 +217,8 @@ const getSelectedOutput = () => {
             return document.getElementById('results-kirjaviite');
         case 'tab-2':
             return document.getElementById('results-cite-book');
+        case 'tab-3':
+            return document.getElementById('results-xml');
         case 'tab-6':
             return document.getElementById('results-english');
     }
@@ -157,6 +233,8 @@ const getSelectedXSL = () => {
             return data.xsl.marcToKirjaviite;
         case 'tab-2':
             return data.xsl.marcToCiteBook;
+        case 'tab-3':
+            return data.xsl.marcToMarc;
         case 'tab-6':
             return data.xsl.marcToEnglish;
     }
@@ -168,7 +246,7 @@ const showResult = (result) => {
     if ( !xsl ) {
         return;
     }
-    
+
     const outputDiv = getSelectedOutput();
     if ( !outputDiv ) {
         return;
@@ -186,14 +264,14 @@ const submitQuery = async () => {
     const creator = document.getElementById('creator-input').value;
     const title = document.getElementById('title-input').value;
     const publisher = document.getElementById('publisher-input').value;
-    const date = document.getElementById('date-input').value;    
-    
+    const date = document.getElementById('date-input').value;
+
     let cglQuery;
     if ( rawQuery !== "" ) {
         cglQuery = rawQuery;
     } else {
         cglQuery = cgl.andQuery({
-            isbn,
+            identifier: isbn,
             creator,
             title,
             publisher,
@@ -205,14 +283,21 @@ const submitQuery = async () => {
         return;
     }
 
+    document.getElementById('loading').style.display = 'inline-block';
+    
+    const messageSpan = document.getElementById('message');    
+    messageSpan.textContent = "";
     clearResults()
+    unselectRecords();
 
     try {
         const queryResult = await makeQuery(cglQuery);
-        
+
         showResult(queryResult);
+        document.getElementById('loading').style.display = 'none';
     } catch ( e ) {
         alert("Error: " + e);
+        document.getElementById('loading').style.display = 'none';
     }
 };
 
@@ -228,8 +313,20 @@ const tabSelected = async (event) => {
 
 
 const onLoad = async () => {
+    document.getElementById('loading').style.display = 'none';
+
+    if ( location.search === "?debug=1" ) {
+        for ( let elem of document.querySelectorAll('.debug') ) {
+            if ( [ "DIV" ].indexOf(elem.tagName) !== -1 ) {
+                elem.style.display = 'block';
+            } else {
+                elem.style.display = 'inline';
+            }
+        }
+    }
+
     data.xsl.marcToKirjaviite = await fetchXML('marc-to-Kirjaviite.xsl');
-    data.xsl.marcToCiteBook = await fetchXML('marc-to-cite book.xsl');    
+    data.xsl.marcToCiteBook = await fetchXML('marc-to-cite book.xsl');
     data.xsl.marcToEnglish = await fetchXML('MARC21slim2English.xsl');
 
     document.forms['isbn-form'].onsubmit = (event) => {
@@ -242,7 +339,7 @@ const onLoad = async () => {
     for ( let tabButton of tabButtons ) {
         tabButton.addEventListener("click", tabSelected, false);
     }
-    
+
 };
 
 document.addEventListener( "DOMContentLoaded", onLoad, false );
