@@ -86,3 +86,7 @@ input:focus {
 .selected-record {
     background-color: #ceedfc;
 }
+
+a {
+    text-decoration: none;
+}
