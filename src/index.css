@@ -78,10 +78,11 @@ input:focus {
     outline: solid #ceedfc 1px;
 }
 
-textarea {
-    width: 100%;
-}
 
 .debug {
     display: none;
+}
+
+.selected-record {
+    background-color: #ceedfc;
 }

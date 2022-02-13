@@ -16,7 +16,7 @@ const data = {
 
 const state = {
     queryCache: {},
-    selectedXSL: undefined,
+    selectedRecord: undefined,
 };
 
 window.queryCache = state.queryCache;
@@ -42,9 +42,7 @@ const fetchXML = async (filename) => {
 
 
 const transformDocument = (xml, xsl) => {
-    console.log("transfrom:", xsl);
     if ( xsl === data.xsl.marcToMarc ) {
-        console.log("marc to marc");
         const txt = document.createTextNode(xml.outerHTML);
         return txt;
     }
@@ -87,6 +85,50 @@ const clearResults = () => {
         resultDiv.textContent = "";
     }
 };
+
+const unselectRecords = () => {
+    const oldSels = document.getElementsByClassName('selected-record');
+    for ( let oldSel of oldSels ) {
+        oldSel.classList.remove('selected-record');
+    }
+    state.selectedRecord = undefined;
+}
+
+const selectRecordClass = (classId) => {
+    const newSels = document.getElementsByClassName(classId);
+    if ( newSels.length === 0 ) {
+        return;
+    }
+    
+    unselectRecords();
+
+    for ( let newSel of newSels ) {
+        newSel.classList.add('selected-record');
+    }
+    state.selectedRecord = classId;
+}
+
+const getChildOfClass = (resultsDiv, classId) => {
+    for ( let i in resultsDiv.children ) {
+        const child = resultsDiv.children[i];
+        if ( child.classList.contains(classId) ) {
+            return child;
+        }
+    }
+
+    return null;
+};
+
+const scrollTo = (resultsDiv, classId) => {
+    const recordElem = getChildOfClass(resultsDiv, classId);
+    if ( !recordElem ) {
+        return;
+    }
+    
+    const topPos = recordElem.offsetTop;
+    resultsDiv.scrollTop = topPos;
+}
+
 
 const showNumberOfRecords = (text) => {
     const messageSpan = document.getElementById('message');
@@ -131,18 +173,29 @@ const showResultInOutput = (queryResultDoc, xsl, resultsDiv) => {
     for ( let record of records ) {
         if ( record !== records[0] && xsl !== data.xsl.marcToMarc ) {
             const divider = document.createElement('div');
-            divider.setAttribute('class', 'result-divider');
+            divider.classList.add('result-divider');
             divider.appendChild(document.createTextNode(`Result ${count}`));
             resultsDiv.appendChild(divider);
         }
 
         const resultDocument = transformDocument(record, xsl);
-        resultsDiv.appendChild(resultDocument);
+        const container = document.createElement('div');
+        container.appendChild(resultDocument);
+        container.classList.add(`record-${count}`);
+        resultsDiv.appendChild(container);
+        container.onclick = (event) => {
+            selectRecordClass(event.target.getAttribute('class'));
+        };
         count++;
     }
 
     if ( xsl === data.xsl.marcToMarc ) {
         resultsDiv.appendChild(document.createTextNode('</container>\n'));
+    }
+
+    if ( state.selectedRecord ) {
+        selectRecordClass(state.selectedRecord);
+        scrollTo(resultsDiv, state.selectedRecord);
     }
 
 }
@@ -181,7 +234,6 @@ const getSelectedXSL = () => {
         case 'tab-2':
             return data.xsl.marcToCiteBook;
         case 'tab-3':
-            console.log("output xml marctomarc");
             return data.xsl.marcToMarc;
         case 'tab-6':
             return data.xsl.marcToEnglish;
@@ -236,6 +288,7 @@ const submitQuery = async () => {
     const messageSpan = document.getElementById('message');    
     messageSpan.textContent = "";
     clearResults()
+    unselectRecords();
 
     try {
         const queryResult = await makeQuery(cglQuery);
