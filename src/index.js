@@ -89,13 +89,18 @@ const clearResults = () => {
 };
 
 const showNumberOfRecords = (text) => {
-    const infoDiv = document.getElementById('message');
+    const messageSpan = document.getElementById('message');
     const num = parseInt(text, 10);
-    const cap = Math.min(num, 10);
-    if ( num > 0 ) {
-        infoDiv.textContent = `Found ${num} records. Showing 1–${cap}.`;
+    const MAX = 10;
+    const cap = Math.min(num, MAX);
+    if ( num === 0 ) {
+        messageSpan.textContent = `Löytyi 0 tietuetta.`;
+    } else if ( num === 1 ) {
+        messageSpan.textContent = `Löytyi 1 tietue.`;
+    } else if ( num <= MAX ) {
+        messageSpan.textContent = `Löytyi ${num} tietuetta.`;
     } else {
-        infoDiv.textContent = `Found ${num}.`;
+        messageSpan.textContent = `Löytyi ${num} tietuetta. Näytetään 1–${cap}.`;
     }
 };
 
@@ -227,6 +232,9 @@ const submitQuery = async () => {
     }
 
     document.getElementById('loading').style.display = 'inline-block';
+    
+    const messageSpan = document.getElementById('message');    
+    messageSpan.textContent = "";
     clearResults()
 
     try {
@@ -253,6 +261,16 @@ const tabSelected = async (event) => {
 
 const onLoad = async () => {
     document.getElementById('loading').style.display = 'none';
+
+    if ( location.search === "?debug=1" ) {
+        for ( let elem of document.querySelectorAll('.debug') ) {
+            if ( [ "DIV" ].indexOf(elem.tagName) !== -1 ) {
+                elem.style.display = 'block';
+            } else {
+                elem.style.display = 'inline';
+            }
+        }
+    }
 
     data.xsl.marcToKirjaviite = await fetchXML('marc-to-Kirjaviite.xsl');
     data.xsl.marcToCiteBook = await fetchXML('marc-to-cite book.xsl');

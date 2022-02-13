@@ -25,7 +25,19 @@
 
       
       <div class="panel">
-        <div class="panel-body">        
+        <div class="panel-body">
+          <div class="info">
+            <p>
+              Hakee kirjan tiedot Fennicasta ja muodostaa niistä wikeissä käytettävän viitteen.
+              Kentät toimivat JA-periaatteella. Ohjelma näyttää korkeintaan kymmenen hakutulosta.
+              Jos oikeaa kirjaa ei löydy, tarkenna hakua.
+            </p>
+            <p>
+              Huom. kyselyt eivät mene suoraan Fennicaan, vaan välityspalvelimeni kautta (koska selaimesta
+              ei voi suoraan hakea tietoa ulkoiselta palvelimelta ellei tätä ole palvelimella erikseen
+              sallittu).
+            </p>
+          </div>  
           <form name="isbn-form">
             <label for="isbn-input">ISBN: </label>
             <input type="text" id="isbn-input" /><br/>
@@ -42,10 +54,12 @@
             <label for="date-input">Ajankohta: </label>
             <input type="text" id="date-input" /><br/>
             
-            <label for="query-input">Query: </label>      
-            <input type="text" id="query-input" /><br/>
+            <span class="debug">
+              <label for="query-input">Query: </label>      
+              <input type="text" id="query-input" /><br/>
+            </span>
             
-            <input type="submit" value="Search" class="btn" />      
+            <input type="submit" value="Hae" class="btn" />      
           </form>
         </div>
       </div>      
@@ -60,18 +74,14 @@
       <div class="tab-elements">
         <input type="radio" id="tab-1" name="tab-elements" checked class="btn">
         <input type="radio" id="tab-2" name="tab-elements" class="btn">
-        <input type="radio" id="tab-3" name="tab-elements" class="btn">
-        <input type="radio" id="tab-4" name="tab-elements" class="btn">
-        <input type="radio" id="tab-5" name="tab-elements" class="btn">
         <input type="radio" id="tab-6" name="tab-elements" class="btn">
+        <input type="radio" id="tab-3" name="tab-elements" class="btn">
         <div class="responsive-tabs">
           <div class="tab-btns">
 	    <label for="tab-1" class="btn" tabindex="0">Kirjaviite</label>
 	    <label for="tab-2" class="btn" tabindex="0">Cite book</label>
-	    <label for="tab-3" class="btn" tabindex="0">XML</label>
-	    <label for="tab-4" class="btn" tabindex="0">Tab 4</label>
-	    <label for="tab-5" class="btn" tabindex="0">Tab 5</label>
 	    <label for="tab-6" class="btn" tabindex="0">Info</label>
+	    <label for="tab-3" class="btn debug" tabindex="0">XML</label>
           </div>
         </div>
         <div class="tab-info-wrap">
@@ -89,22 +99,14 @@
           </div>
           <div class="tab-info">
             <div class="panel scrollable-panel">
-              <textarea id="results-xml" class="results" disabled>
-              </textarea>
-            </div>
-          </div>
-          <div class="tab-info">
-	    <h3>Information for tab 4</h3>
-	    Another line of information.
-          </div>
-          <div class="tab-info">
-	    <h3>Information for tab 5</h3>
-	    Another line of information.
-          </div>
-          <div class="tab-info">
-            <div class="panel scrollable-panel">
               <div id="results-english" class="results">
               </div>
+            </div>
+          </div>
+          <div class="tab-info debug">
+            <div class="panel scrollable-panel">
+              <textarea id="results-xml" class="results" disabled>
+              </textarea>
             </div>
           </div>
         </div>
