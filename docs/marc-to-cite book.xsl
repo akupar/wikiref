@@ -32,19 +32,54 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
+
+    <xsl:template name="author">
+    <xsl:apply-templates select="marc:datafield[@tag=100]/marc:subfield[@code='e'] 
+                                 | marc:datafield[@tag=100] 
+                                 | marc:datafield[@tag=700]/marc:subfield[@code='e']"/>
+    </xsl:template>
+    
 
   <xsl:template match="marc:record">
     <xsl:text>{{cite book&#10;</xsl:text>
-    <xsl:text> | last = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=700]"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | date = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='c']"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | title = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=245]"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | url = &#10;</xsl:text>
-    <xsl:text> | location = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='a']"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | publisher = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='b']"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | page = </xsl:text><xsl:text>&#10;</xsl:text>
-    <xsl:text> | isbn = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=020]/marc:subfield[@code='a']"/><xsl:text>&#10;</xsl:text>
-    <xsl:text> | language = </xsl:text><xsl:apply-templates select="marc:datafield[@tag=041]/marc:subfield[@code='a']"/><xsl:text>&#10;</xsl:text>
+    <xsl:call-template name="author"/>
+    <xsl:text>&#10;</xsl:text>
+    
+    <xsl:text> | date = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='c']"/>
+    <xsl:text>&#10;</xsl:text>
+    
+    <xsl:text> | title = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=245]"/>
+    <xsl:text>&#10;</xsl:text>
+    
+    <xsl:text> | url = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=856]/marc:subfield[@code='u']"/>
+    <xsl:text>&#10;</xsl:text>
+
+    <xsl:text> | format = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=856]/marc:subfield[@code='q']"/>
+    <xsl:text>&#10;</xsl:text>
+        
+    <xsl:text> | location = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='a']"/>
+    <xsl:text>&#10;</xsl:text>
+    
+    <xsl:text> | publisher = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=260]/marc:subfield[@code='b']"/>
+    <xsl:text>&#10;</xsl:text>
+    
+    <xsl:text> | page = </xsl:text>
+    <xsl:text>&#10;</xsl:text>
+    
+    <xsl:text> | isbn = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=020]/marc:subfield[@code='a']"/>
+    <xsl:text>&#10;</xsl:text>
+    
+    <xsl:text> | language = </xsl:text>
+    <xsl:apply-templates select="marc:datafield[@tag=041]/marc:subfield[@code='a']"/>
+    <xsl:text>&#10;</xsl:text>
     <xsl:text>}}&#10;</xsl:text>
   </xsl:template>
 
@@ -83,6 +118,7 @@
     </xsl:if>
   </xsl:template>
 
+  
   <xsl:template match="marc:datafield[@tag=245]">
     <!-- Title -->
 
@@ -120,28 +156,71 @@
     <xsl:value-of select="text()"/>
   </xsl:template>
 
-
-  <xsl:template match="marc:datafield[@tag=700]">
-      <xsl:for-each select="marc:subfield[@code='a']">
-	<!-- Personal name -->
-        <xsl:call-template name="remove-suffix">
-          <xsl:with-param name="text" select="text()"/>
-        </xsl:call-template>
-      </xsl:for-each>
-      <xsl:for-each select="marc:subfield[@code='e']">
-	<!-- Relator term -->
-	<xsl:text> (</xsl:text>
-        <xsl:call-template name="remove-suffix">
-          <xsl:with-param name="text" select="text()"/>
-        </xsl:call-template>
-        <xsl:text>)</xsl:text>
-      </xsl:for-each>
-
-      <xsl:if test="position() != last()">
-        <xsl:text> &amp; </xsl:text>
+  <xsl:template match="marc:datafield[@tag=100]">
+    <xsl:for-each select="marc:subfield[@code='a']">
+      <xsl:text> | author = </xsl:text>
+      <xsl:if test="not(position() = 1 and position() = last())">
+        <xsl:value-of select="position()"/>
       </xsl:if>
+	<!-- Main entry - Personal name -->
+        <xsl:call-template name="remove-suffix">
+          <xsl:with-param name="text" select="text()"/>
+        </xsl:call-template>
+      </xsl:for-each>
   </xsl:template>
 
+  
+  <xsl:template match="marc:datafield[@tag=100]/marc:subfield[@code='e'] | marc:datafield[@tag=700]/marc:subfield[@code='e']">
+
+    <xsl:choose>
+      <xsl:when test="text() = 'toimittaja.'">
+        <xsl:text> | editor</xsl:text>
+        <xsl:if test="not(position() = 1 and position() = last())">
+          <xsl:value-of select="position()"/>
+        </xsl:if>
+        <xsl:text> = </xsl:text>
+        <xsl:for-each select="../marc:subfield[@code='a']">
+	  <!-- Personal name -->
+          <xsl:call-template name="remove-suffix">
+            <xsl:with-param name="text" select="text()"/>
+          </xsl:call-template>
+        </xsl:for-each>
+      </xsl:when>
+
+      <xsl:when test="text() = 'kääntäjä.'">
+        <xsl:text> | translator</xsl:text>
+        <xsl:if test="not(position() = 1 and position() = last())">
+          <xsl:value-of select="position()"/>
+        </xsl:if>
+        <xsl:text> = </xsl:text>
+        <xsl:for-each select="../marc:subfield[@code='a']">
+	  <!-- Personal name -->
+          <xsl:call-template name="remove-suffix">
+            <xsl:with-param name="text" select="text()"/>
+          </xsl:call-template>
+        </xsl:for-each>
+      </xsl:when>
+
+      <xsl:otherwise>
+        <xsl:text> | author</xsl:text>
+        <xsl:if test="not(position() = 1 and position() = last())">
+          <xsl:value-of select="position()"/>
+        </xsl:if>
+        <xsl:text> = </xsl:text>
+        <xsl:for-each select="../marc:subfield[@code='a']">
+	  <!-- Personal name -->
+          <xsl:call-template name="remove-suffix">
+            <xsl:with-param name="text" select="text()"/>
+          </xsl:call-template>
+        </xsl:for-each>
+      </xsl:otherwise>
+    </xsl:choose>
+    
+  </xsl:template>
+
+  <xsl:template match="marc:datafield[@tag=700]/marc:subfield[@code='a']">
+  </xsl:template>
+  
   <xsl:template match="marc:datafield[@tag=*]">
   </xsl:template>
 

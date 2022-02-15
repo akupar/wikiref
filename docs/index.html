@@ -25,7 +25,19 @@
 
       
       <div class="panel">
-        <div class="panel-body">        
+        <div class="panel-body">
+          <div class="info">
+            <p>
+              Hakee kirjan tiedot <a href="https://kansalliskirjasto.finna.fi/Search/Results?limit=0&hiddenFilters%5B0%5D=building%3A%220/NLF/%22&hiddenFilters%5B1%5D=-building%3A%221/NLF/arto/%22&type=AllFields&filter%5B0%5D=~collection%3A%22FEN%22">Fennicasta</a> ja muodostaa niistä wikeissä käytettävän viitteen.
+              Kentät toimivat JA-periaatteella. Ohjelma näyttää korkeintaan kymmenen hakutulosta.
+              Jos oikeaa kirjaa ei löydy, tarkenna hakua.
+            </p>
+            <p>
+              Huom. kyselyt eivät mene suoraan Fennicaan, vaan välityspalvelimeni kautta, jonka logiin tallentuu
+              kellonaika, ip-osoite ja hakuparametrit (koska selaimista ei voi suoraan hakea tietoa kolmannen
+              osapuolen palvelimelta ellei tätä ole palvelimella erikseen konfiguroitu).
+            </p>
+          </div>  
           <form name="isbn-form">
             <label for="isbn-input">ISBN: </label>
             <input type="text" id="isbn-input" /><br/>
@@ -42,17 +54,19 @@
             <label for="date-input">Ajankohta: </label>
             <input type="text" id="date-input" /><br/>
             
-            <label for="query-input">Query: </label>      
-            <input type="text" id="query-input" /><br/>
+            <span class="debug">
+              <label for="query-input">Query: </label>      
+              <input type="text" id="query-input" /><br/>
+            </span>
             
-            <input type="submit" value="Search" class="btn" />      
+            <input type="submit" value="Hae" class="btn" />      
           </form>
         </div>
       </div>      
 
       <div class="panel">
       <div id="query-info" class="panel-body">
-
+        <span id="loading"><i class="loading-v2"></i> Loading</span><span id="message"></span>
       </div>
       </div>
 
@@ -60,18 +74,14 @@
       <div class="tab-elements">
         <input type="radio" id="tab-1" name="tab-elements" checked class="btn">
         <input type="radio" id="tab-2" name="tab-elements" class="btn">
-        <input type="radio" id="tab-3" name="tab-elements" class="btn">
-        <input type="radio" id="tab-4" name="tab-elements" class="btn">
-        <input type="radio" id="tab-5" name="tab-elements" class="btn">
         <input type="radio" id="tab-6" name="tab-elements" class="btn">
+        <input type="radio" id="tab-3" name="tab-elements" class="btn">
         <div class="responsive-tabs">
           <div class="tab-btns">
 	    <label for="tab-1" class="btn" tabindex="0">Kirjaviite</label>
 	    <label for="tab-2" class="btn" tabindex="0">Cite book</label>
-	    <label for="tab-3" class="btn" tabindex="0">Tab 3</label>
-	    <label for="tab-4" class="btn" tabindex="0">Tab 4</label>
-	    <label for="tab-5" class="btn" tabindex="0">Tab 5</label>
 	    <label for="tab-6" class="btn" tabindex="0">Info</label>
+	    <label for="tab-3" class="btn debug" tabindex="0">XML</label>
           </div>
         </div>
         <div class="tab-info-wrap">
@@ -88,23 +98,15 @@
             </div>
           </div>
           <div class="tab-info">
-	    <h3>Information for tab 3</h3>
-	    Another line of information.
-	    <br>
-	    Another line of information.
-          </div>
-          <div class="tab-info">
-	    <h3>Information for tab 4</h3>
-	    Another line of information.
-          </div>
-          <div class="tab-info">
-	    <h3>Information for tab 5</h3>
-	    Another line of information.
-          </div>
-          <div class="tab-info">
             <div class="panel scrollable-panel">
               <div id="results-english" class="results">
               </div>
+            </div>
+          </div>
+          <div class="tab-info debug">
+            <div class="panel scrollable-panel">
+              <pre id="results-xml" class="results">
+              </pre>
             </div>
           </div>
         </div>

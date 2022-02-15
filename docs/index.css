@@ -1,6 +1,5 @@
 html, body {
     height: 100vh;
-    padding: 0 1em;
 }
 
 body {
@@ -9,12 +8,19 @@ body {
 
 #main {
     margin: 0 auto;
-    padding: 0 1em;
+    padding: 0.5em;
     background-color: white;
     width: 768px;
     height: 100vh;
     overflow: clip;
     
+}
+
+.info {
+    float: right;
+    width: 50%;
+    padding: 0.4em;
+    text-align: justify;
 }
 
 
@@ -45,7 +51,7 @@ form label {
 }
 
 label::focus {
-    outline: dashed black 1px;
+    outline: dashed #ceedfc 1px;
 }
 
 .scrollable-panel {
@@ -56,6 +62,7 @@ label::focus {
 
 .scrollable-panel > * {
     height: 100%;
+    white-space: pre-wrap;
 }
 
 .result-divider {
@@ -68,5 +75,18 @@ label::focus {
 }
 
 input:focus {
-    outline: dashed gray 1px;
+    outline: solid #ceedfc 1px;
+}
+
+
+.debug {
+    display: none;
+}
+
+.selected-record {
+    background-color: #ceedfc;
+}
+
+a {
+    text-decoration: none;
 }
